@@ -20,7 +20,7 @@ fi
 rm -f /usr/local/bin/v2raya
 
 echo "1. v2rayA has been removed from your system, but the configuration files
-   are still there; the path is /usr/local//etc/v2raya. If you want to 
+   are still there; the path is /usr/local/etc/v2raya. If you want to 
    remove them, you can delete them manually.
 2. v2ray/xray has not been removed, beacuse they might not installed by
    this installer, you can remove them manually if you want."
