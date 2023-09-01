@@ -213,7 +213,7 @@ stop_v2raya() {
 ## Installing
 install_v2ray() {
     unzip -q /tmp/v2ray.zip -d /tmp/v2ray
-    install ./v2ray/v2ray /usr/local/bin/v2ray
+    install /tmp/v2ray/v2ray /usr/local/bin/v2ray
     [ -d /usr/local/share/v2ray ] || mkdir -p /usr/local/share/v2ray
     mv /tmp/v2ray/geoip.dat /usr/local/share/v2ray/geoip.dat
     mv /tmp/v2ray/geosite.dat /usr/local/share/v2ray/geosite.dat
@@ -221,7 +221,7 @@ install_v2ray() {
 }
 install_xray() {
     unzip -q /tmp/xray.zip -d /tmp/xray
-    install ./xray/xray /usr/local/bin/xray
+    install /tmp/xray/xray /usr/local/bin/xray
     [ -d /usr/local/share/xray ] || mkdir -p /usr/local/share/xray
     mv /tmp/xray/geoip.dat /usr/local/share/xray/geoip.dat
     mv /tmp/xray/geosite.dat /usr/local/share/xray/geosite.dat
@@ -280,7 +280,7 @@ if [ "$1" = '' ] || [ "$1" = '--with-v2ray' ]; then
         start_v2raya
     fi
 fi
-if [ "$1" = '' ] || [ "$1" = '--with-xray' ]; then
+if [ "$1" = '--with-xray' ]; then
     check_xray_local_version
     check_xray_remote_version
     check_v2raya_local_version
