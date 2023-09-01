@@ -25,21 +25,23 @@ fi
 if ! command -v unzip > /dev/null 2>&1; then
     tool_need_install="$tool_need_install ""unzip"
 fi
-if command -v apt > /dev/null 2>&1; then
-    apt update && apt install -y "$tool_need_install"
-elif command -v yum > /dev/null 2>&1; then
-    yum install -y "$tool_need_install"
-elif command -v dnf > /dev/null 2>&1; then
-    dnf install -y "$tool_need_install"
-elif command -v zypper > /dev/null 2>&1; then
-    zypper --non-interactive install "$tool_need_install"
-elif command -v pacman > /dev/null 2>&1; then
-    pacman -S --noconfirm "$tool_need_install"
-elif command -v apk > /dev/null 2>&1; then
-    apk add "$tool_need_install"
-else
-    echo "${RED}Error: Please install $tool_need_install then try again!${RESET}" >&2
-    exit 1
+if [ "$tool_need_install" != "" ]; then
+    if command -v apt > /dev/null 2>&1; then
+        apt update && apt install -y "$tool_need_install"
+    elif command -v yum > /dev/null 2>&1; then
+        yum install -y "$tool_need_install"
+    elif command -v dnf > /dev/null 2>&1; then
+        dnf install -y "$tool_need_install"
+    elif command -v zypper > /dev/null 2>&1; then
+        zypper --non-interactive install "$tool_need_install"
+    elif command -v pacman > /dev/null 2>&1; then
+        pacman -S --noconfirm "$tool_need_install"
+    elif command -v apk > /dev/null 2>&1; then
+        apk add "$tool_need_install"
+    else
+        echo "${RED}Error: Please install $tool_need_install then try again!${RESET}" >&2
+        exit 1
+    fi
 fi
 
 ## Check OS and arch
@@ -218,6 +220,7 @@ install_v2ray() {
     mv /tmp/v2ray/geoip.dat /usr/local/share/v2ray/geoip.dat
     mv /tmp/v2ray/geosite.dat /usr/local/share/v2ray/geosite.dat
     rm -rf /tmp/v2ray.zip /tmp/v2ray
+    echo "${GREEN}v2ray version $v2ray_remote_version installed successfully!${RESET}"
 }
 install_xray() {
     unzip -q /tmp/xray.zip -d /tmp/xray
@@ -226,6 +229,7 @@ install_xray() {
     mv /tmp/xray/geoip.dat /usr/local/share/xray/geoip.dat
     mv /tmp/xray/geosite.dat /usr/local/share/xray/geosite.dat
     rm -rf /tmp/xray.zip /tmp/xray
+    echo "${GREEN}xray version $xray_remote_version installed successfully!${RESET}"
 }
 install_v2raya() {
     install /tmp/v2raya /usr/local/bin/v2raya
@@ -239,6 +243,7 @@ install_v2raya() {
     fi
     rm -f /tmp/v2raya 
     [ -f /tmp/v2raya.service ] && rm -f /tmp/v2raya.service || [ -f /tmp/v2raya-openrc ] && rm -f /tmp/v2raya-openrc
+    echo "${GREEN}v2rayA version $v2raya_remote_version installed successfully!${RESET}"
 }
 
 ## Start v2rayA service
