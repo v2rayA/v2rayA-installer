@@ -172,7 +172,7 @@ download_v2ray() {
     fi
 }
 download_xray() {
-    echo "${YELLOW}Downloading xray version $xray_remote_version${RESET}"
+    echo "${GREEN}Downloading xray version $xray_remote_version${RESET}"
     echo "${GREEN}Downloading from $xray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/xray.zip" -# "$xray_url"; then
         echo "${RED}Error: Failed to download xray!${RESET}" >&2
@@ -180,19 +180,23 @@ download_xray() {
     fi
 }
 download_v2raya() {
-    echo "${YELLOW}Downloading v2rayA version $v2raya_remote_version${RESET}"
+    echo "${GREEN}Downloading v2rayA version $v2raya_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2raya_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya" -# "$v2raya_url"; then
         echo "${RED}Error: Failed to download v2rayA!${RESET}" >&2
         exit 1
     fi
     if command -v systemctl > /dev/null 2>&1; then
-        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.service" -s "https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/systemd/v2raya.service"; then
+        echo "${GREEN}Downloading v2rayA service file${RESET}"
+        echo "${GREEN}Downloading from https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/systemd/v2raya.service${RESET}"
+        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.service" -# "https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/systemd/v2raya.service"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
             exit 1
         fi
     fi
     if command -v rc-service > /dev/null 2>&1; then
+        echo "${GREEN}Downloading v2rayA service file${RESET}"
+        echo "${GREEN}Downloading from https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/openrc/v2raya${RESET}"
         if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya-openrc" -s "https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/openrc/v2raya"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
             exit 1
@@ -311,6 +315,16 @@ if [ "$1" = '--with-xray' ]; then
         start_v2raya
     fi
 fi
+if [ "$(command -v systemctl)" ]; then
+    echo "${GREEN}Start v2rayA service now:${RESET}" systemctl start v2raya
+    echo "${GREEN}Auto start v2rayA service:${RESET}" systemctl enable v2raya
+elif [ "$(command -v rc-service)" ]; then
+    echo "${GREEN}Start v2rayA service now:${RESET}" rc-service v2raya start
+    echo "${GREEN}Auto start v2rayA service:${RESET}" rc-update add v2raya
+else
+    echo "${YELLOW}systemd/openrc not found on your system, write and manage service by yourself.${RESET}"
+fi
+
 if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
     echo "${RED}Error: Invalid argument!${RESET}" >&2
     echo "${GREEN}Usage: installer.sh [--with-v2ray|--with-xray]${RESET}" >&2
