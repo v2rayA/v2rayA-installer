@@ -315,6 +315,11 @@ if [ "$1" = '--with-xray' ]; then
         start_v2raya
     fi
 fi
+if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
+    echo "${RED}Error: Invalid argument!${RESET}" >&2
+    echo "${GREEN}Usage: installer.sh [--with-v2ray|--with-xray]${RESET}" >&2
+    exit 1
+fi
 if [ "$(command -v systemctl)" ]; then
     echo "${GREEN}Start v2rayA service now:${RESET}" systemctl start v2raya
     echo "${GREEN}Auto start v2rayA service:${RESET}" systemctl enable v2raya
@@ -323,10 +328,4 @@ elif [ "$(command -v rc-service)" ]; then
     echo "${GREEN}Auto start v2rayA service:${RESET}" rc-update add v2raya
 else
     echo "${YELLOW}systemd/openrc not found on your system, write and manage service by yourself.${RESET}"
-fi
-
-if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
-    echo "${RED}Error: Invalid argument!${RESET}" >&2
-    echo "${GREEN}Usage: installer.sh [--with-v2ray|--with-xray]${RESET}" >&2
-    exit 1
 fi
