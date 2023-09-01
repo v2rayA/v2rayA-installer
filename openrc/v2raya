@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+
+name="v2rayA"
+description="A Linux web GUI client of Project V which supports V2Ray, Xray, SS, SSR, Trojan and Pingtunnel"
+command="/usr/local/bin/v2raya"
+error_log="/var/log/v2raya/error.log"
+pidfile="/run/${RC_SVCNAME}.pid"
+command_background="yes"
+rc_ulimit="-n 30000"
+rc_cgroup_cleanup="yes"
+
+depend() {
+    need net
+    after net
+}
+
+start_pre() {
+   export V2RAYA_CONFIG="/usr/local/etc/v2raya"
+   export V2RAYA_LOG_FILE="/tmp/v2raya/access.log"
+   if [ ! -d "/tmp/v2raya/" ]; then
+     mkdir "/tmp/v2raya"
+   fi
+   if [ ! -d "/var/log/v2raya/" ]; then
+   ln -s "/tmp/v2raya/" "/var/log/"
+   fi
+}
