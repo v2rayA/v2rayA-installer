@@ -1,7 +1,7 @@
 #!/sbin/openrc-run
 
 name="v2rayA"
-description="A Linux web GUI client of Project V which supports V2Ray, Xray, SS, SSR, Trojan and Pingtunnel"
+description="A web GUI client of Project V which supports VMess, VLESS, SS, SSR, Trojan, Tuic and Juicity protocols"
 command="/usr/local/bin/v2raya"
 error_log="/var/log/v2raya/error.log"
 pidfile="/run/${RC_SVCNAME}.pid"

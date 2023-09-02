@@ -187,17 +187,19 @@ download_v2raya() {
         exit 1
     fi
     if command -v systemctl > /dev/null 2>&1; then
+        service_file_url="https://github.com/v2rayA/v2rayA-installer/raw/main/systemd/v2raya.service"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
-        echo "${GREEN}Downloading from https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/systemd/v2raya.service${RESET}"
-        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.service" -# "https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/systemd/v2raya.service"; then
+        echo "${GREEN}Downloading from $service_file_url${RESET}"
+        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.service" -# "$service_file_url"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
             exit 1
         fi
     fi
     if command -v rc-service > /dev/null 2>&1; then
+        service_script_url="https://github.com/v2rayA/v2rayA-installer/raw/main/openrc/v2raya"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
-        echo "${GREEN}Downloading from https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/openrc/v2raya${RESET}"
-        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya-openrc" -s "https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/openrc/v2raya"; then
+        echo "${GREEN}Downloading from $service_script_url${RESET}"
+        if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya-openrc" -s "$service_script_url"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
             exit 1
         fi
