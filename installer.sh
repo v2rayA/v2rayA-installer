@@ -297,7 +297,7 @@ install_v2ray() {
     [ -d /usr/local/share/v2ray ] || mkdir -p /usr/local/share/v2ray
     mv "$v2ray_temp_file"_unzipped/geoip.dat /usr/local/share/v2ray/geoip.dat
     mv "$v2ray_temp_file"_unzipped/geosite.dat /usr/local/share/v2ray/geosite.dat
-    rm -rf "$v2ray_temp_file" "$v2ray_temp_file"_unzipped
+    rm -rf "$v2ray_temp_file" "$v2ray_temp_file"_unzipped "$v2ray_temp_file".dgst
     echo "${GREEN}v2ray version $v2ray_remote_version installed successfully!${RESET}"
 }
 install_xray() {
@@ -306,7 +306,7 @@ install_xray() {
     [ -d /usr/local/share/xray ] || mkdir -p /usr/local/share/xray
     mv "$xray_temp_file"_unzipped/geoip.dat /usr/local/share/xray/geoip.dat
     mv "$xray_temp_file"_unzipped/geosite.dat /usr/local/share/xray/geosite.dat
-    rm -rf "$xray_temp_file" "$xray_temp_file"_unzipped
+    rm -rf "$xray_temp_file" "$xray_temp_file"_unzipped "$xray_temp_file".dgst
     echo "${GREEN}xray version $xray_remote_version installed successfully!${RESET}"
 }
 install_v2raya() {
@@ -317,7 +317,7 @@ install_v2raya() {
     elif command -v rc-service > /dev/null 2>&1; then
         install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
     fi
-    rm -f "$v2raya_temp_file" 
+    rm -f "$v2raya_temp_file" "$v2raya_temp_file".sha256.txt 
     [ -f "$v2raya_temp_file".service ] && rm -f "$v2raya_temp_file".service || [ -f "$v2raya_temp_file"-openrc ] && rm -f "$v2raya_temp_file"-openrc
     echo "${GREEN}v2rayA version $v2raya_remote_version installed successfully!${RESET}"
 }
@@ -395,11 +395,29 @@ if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; th
     exit 1
 fi
 if [ "$(command -v systemctl)" ]; then
-    echo "${GREEN}Start v2rayA service now:${RESET}" systemctl start v2raya
-    echo "${GREEN}Auto start v2rayA service:${RESET}" systemctl enable v2raya
+    echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
+    echo "${GREEN}"Commands:"${RESET}"
+    echo "${GREEN}Start v2rayA service now:${RESET}"
+    echo "systemctl start v2raya"
+    echo "${GREEN}Start v2rayA service at system boot:${RESET}"
+    echo "systemctl enable v2raya"
 elif [ "$(command -v rc-service)" ]; then
-    echo "${GREEN}Start v2rayA service now:${RESET}" rc-service v2raya start
-    echo "${GREEN}Auto start v2rayA service:${RESET}" rc-update add v2raya
+    echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
+    echo "${GREEN}"Commands:"${RESET}"
+    echo "${GREEN}Start v2rayA service now:${RESET}"
+    echo "rc-service v2raya start"
+    echo "${GREEN}Start v2rayA service at system boot:${RESET}"
+    echo "rc-update add v2raya"
 else
     echo "${YELLOW}systemd/openrc not found on your system, write and manage service by yourself.${RESET}"
 fi
+
+echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
+echo "1. v2rayA has been installed to your system, the configuration directory is
+   /usr/local/etc/v2raya. 
+2. v2rayA will not start automatically, you can start it by yourself.
+3. If you want to uninstall v2rayA, please run uninstaller.sh.
+4. If you want to update v2rayA, please run installer.sh again.
+5. Official website: https://v2raya.org
+6. Reset password command: v2raya-reset-password"
+echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"

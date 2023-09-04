@@ -19,8 +19,26 @@ fi
 
 rm -f /usr/local/bin/v2raya
 
+if [ -f /usr/local/bin/v2ray ];then
+    echo "v2ray has been detected, do you want to remove it? [y/N]"
+    read -r ans
+    [ "$ans" = y ] && rm -f /usr/local/bin/v2ray \
+    && rm -rf /usr/local/share/v2ray \
+    && echo "v2ray has been removed."
+fi
+
+if [ -f /usr/local/bin/xray ];then
+    echo "xray has been detected, do you want to remove it? [y/N]"
+    read -r ans
+    [ "$ans" = y ] && rm -f /usr/local/bin/xray \
+    && rm -rf /usr/local/share/xray \
+    && echo "xray has been removed."
+fi
+
+echo '--------------------------------------------------------------------------------'
 echo "1. v2rayA has been removed from your system, but the configuration files
    are still there; the path is /usr/local/etc/v2raya. If you want to 
    remove them, you can delete them manually.
-2. v2ray/xray has not been removed, beacuse they might not installed by
-   this installer, you can remove them manually if you want."
+2. Because of the uninstallation of v2rayA, the service of v2rayA has been
+   stopped and been removed."
+echo '--------------------------------------------------------------------------------'
