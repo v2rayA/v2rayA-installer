@@ -198,7 +198,7 @@ compare_v2raya_version() {
 ## Downloading
 download_v2ray() {
     v2ray_temp_file="$(mktemp -u /tmp/v2ray_.XXXXXX.zip)"
-    echo "${YELLOW}Downloading v2ray version $v2ray_remote_version${RESET}"
+    echo "${GREEN}Downloading v2ray version $v2ray_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2ray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file" -# "$v2ray_url"; then
         echo "${RED}Error: Failed to download v2ray!${RESET}" 
@@ -212,8 +212,8 @@ download_v2ray() {
     remote_v2ray_hash=$(awk -F '= ' '/256=/ {print $2}' < "$v2ray_temp_file".dgst)
     if [ "$local_v2ray_hash" != "$remote_v2ray_hash" ]; then
         echo "${RED}Error: v2ray hash value verification failed!${RESET}"
-        Expect: "$remote_v2ray_hash"
-        Actually: "$local_v2ray_hash"
+        echo "Expect: $remote_v2ray_hash"
+        echo "Actually: $local_v2ray_hash"
         exit 1
     fi
 }
@@ -233,8 +233,8 @@ download_xray() {
     remote_xray_hash=$(awk -F '= ' '/256=/ {print $2}' < "$xray_temp_file".dgst)
     if [ "$local_xray_hash" != "$remote_xray_hash" ]; then
         echo "${RED}Error: xray hash value verification failed!${RESET}"
-        Expect: "$remote_xray_hash"
-        Actually: "$local_xray_hash"
+        echo "Expect: $remote_xray_hash"
+        echo "Actually: $local_xray_hash"
         exit 1
     fi
 }
@@ -242,27 +242,27 @@ download_v2raya() {
     v2raya_temp_file="$(mktemp -u /tmp/v2raya.XXXXXX.bin)"
     echo "${GREEN}Downloading v2rayA version $v2raya_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2raya_url${RESET}"
-    if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file" -# "$v2raya_url"; then
+    if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file" -# "$v2raya_url"; then
         echo "${RED}Error: Failed to download v2rayA!${RESET}"
         exit 1
     fi
-    if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file".sha256.txt -s "$v2raya_url".sha256.txt; then
+    if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file".sha256.txt -s "$v2raya_url".sha256.txt; then
         echo "${RED}Error: Failed to download v2rayA sha256 txt!${RESET}"
         exit 1
     fi
     local_v2raya_hash="$(SHA256SUM "$v2raya_temp_file")"
-    remote_v2raya_hash=$(cat "$v2ray_temp_file".sha256.txt)
+    remote_v2raya_hash=$(cat "$v2raya_temp_file".sha256.txt)
     if [ "$local_v2raya_hash" != "$remote_v2raya_hash" ]; then
         echo "${RED}Error: v2rayA hash value verification failed!${RESET}"
-        Expect: "$remote_v2raya_hash"
-        Actually: "$local_v2raya_hash"
+        echo "Expect: $remote_v2raya_hash"
+        echo "Actually: $local_v2raya_hash"
         exit 1
     fi
     if command -v systemctl > /dev/null 2>&1; then
         service_file_url="https://github.com/v2rayA/v2rayA-installer/raw/main/systemd/v2raya.service"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_file_url${RESET}"
-        if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file".service -# "$service_file_url"; then
+        if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file".service -# "$service_file_url"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}"
             exit 1
         fi
@@ -271,7 +271,7 @@ download_v2raya() {
         service_script_url="https://github.com/v2rayA/v2rayA-installer/raw/main/openrc/v2raya"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_script_url${RESET}"
-        if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file"-openrc -s "$service_script_url"; then
+        if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file"-openrc -s "$service_script_url"; then
             echo "${RED}Error: Failed to download v2rayA service file!${RESET}" 
             exit 1
         fi
@@ -310,15 +310,15 @@ install_xray() {
     echo "${GREEN}xray version $xray_remote_version installed successfully!${RESET}"
 }
 install_v2raya() {
-    install "$v2ray_temp_file" /usr/local/bin/v2raya
+    install "$v2raya_temp_file" /usr/local/bin/v2raya
     if command -v systemctl > /dev/null 2>&1; then
-        mv "$v2ray_temp_file".service /etc/systemd/system/v2raya.service
+        mv "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
         systemctl daemon-reload
     elif command -v rc-service > /dev/null 2>&1; then
-        install "$v2ray_temp_file"-openrc /etc/init.d/v2raya
+        install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
     fi
-    rm -f "$v2ray_temp_file" 
-    [ -f "$v2ray_temp_file".service ] && rm -f "$v2ray_temp_file".service || [ -f "$v2ray_temp_file"-openrc ] && rm -f "$v2ray_temp_file"-openrc
+    rm -f "$v2raya_temp_file" 
+    [ -f "$v2raya_temp_file".service ] && rm -f "$v2raya_temp_file".service || [ -f "$v2raya_temp_file"-openrc ] && rm -f "$v2raya_temp_file"-openrc
     echo "${GREEN}v2rayA version $v2raya_remote_version installed successfully!${RESET}"
 }
 
