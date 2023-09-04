@@ -438,5 +438,6 @@ echo "1. v2rayA has been installed to your system, the configuration directory i
 3. If you want to uninstall v2rayA, please run uninstaller.sh.
 4. If you want to update v2rayA, please run installer.sh again.
 5. Official website: https://v2raya.org.
-6. Reset password command: v2raya-reset-password, run it if you forget your password."
+6. Reset password command: v2raya-reset-password, run it if you forget your
+   password."
 echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
