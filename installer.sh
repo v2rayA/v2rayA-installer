@@ -12,6 +12,21 @@ if command -v tput > /dev/null 2>&1; then
     RESET=$(tput sgr0)
 fi
 
+## SHA256SUM
+if command -v sha256sum > /dev/null 2>&1; then
+    SHA256SUM(){
+        sha256sum $1 | awk -F ' ' '{print$1}'
+    }
+elif command -v shasum > /dev/null 2>&1; then
+    SHA256SUM(){
+        shasum -a 256 $1 | awk -F ' ' '{print$1}'
+    }
+elif command -v openssl > /dev/null 2>&1; then
+    SHA256SUM(){
+        openssl dgst -sha256 $1 | awk -F ' ' '{print$2}'
+    }
+fi
+
 ## Check root
 if [ "$(id -u)" -ne 0 ]; then
     echo "${RED}Error: This script must be run as root!${RESET}" >&2
@@ -19,30 +34,44 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 ## Check curl, unzip
-if ! command -v curl > /dev/null 2>&1; then
-    tool_need_install="$tool_need_install""curl"
+for tool in curl unzip; do
+    if ! command -v $tool> /dev/null 2>&1; then
+        tool_need="$tool"" ""$tool_need"
+    fi
+done
+if ! command -v sha256sum > /dev/null 2>&1 && ! command -v shasum > /dev/null 2>&1 && ! command -v openssl > /dev/null 2>&1; then
+    tool_need="openssl"" ""$tool_need"
 fi
-if ! command -v unzip > /dev/null 2>&1; then
-    tool_need_install="$tool_need_install"' '"unzip"
-fi
-if [ "$tool_need_install" != "" ]; then
+if [ -n "$tool_need" ]; then
     if command -v apt > /dev/null 2>&1; then
-        apt update; apt install -y "$tool_need_install"
-    elif command -v yum > /dev/null 2>&1; then
-        yum install -y "$tool_need_install"
+        command_install_tool="apt update; apt install $tool_need -y"
     elif command -v dnf > /dev/null 2>&1; then
-        dnf install -y "$tool_need_install"
+        command_install_tool="dnf install $tool_need -y"
+    elif command -v yum > /dev/null  2>&1; then
+        command_install_tool="yum install $tool_need -y"
     elif command -v zypper > /dev/null 2>&1; then
-        zypper --non-interactive install "$tool_need_install"
+        command_install_tool="zypper --non-interactive install $tool_need"
     elif command -v pacman > /dev/null 2>&1; then
-        pacman -S --noconfirm "$tool_need_install"
+        command_install_tool="pacman -Sy $tool_need --noconfirm"
     elif command -v apk > /dev/null 2>&1; then
-        apk add "$tool_need_install"
+        command_install_tool="apk add $tool_need"
     else
-        echo "${RED}Error: Please install $tool_need_install then try again!${RESET}" >&2
+        echo "$RED""You should install ""$tool_need""then try again.""$RESET"
+        exit 1
+    fi
+    if ! /bin/sh -c "$command_install_tool";then
+        echo "$RED""Use system package manager to install $tool_need failed,""$RESET"
+        echo "$RED""You should install ""$tool_need""then try again.""$RESET"
         exit 1
     fi
 fi
+notice_installled_tool() {
+    if [ -n "$tool_need" ]; then
+        echo "${GREEN}You have installed the following tools during installation:${RESET}"
+        echo "$tool_need"
+        echo "${GREEN}You can uninstall them now if you want.${RESET}"
+    fi
+}
 
 ## Check OS and arch
 if [ "$(uname -s)" != "Linux" ]; then
@@ -167,7 +196,19 @@ download_v2ray() {
     echo "${YELLOW}Downloading v2ray version $v2ray_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2ray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2ray.zip" -# "$v2ray_url"; then
-        echo "${RED}Error: Failed to download v2ray!${RESET}" >&2
+        echo "${RED}Error: Failed to download v2ray!${RESET}" 
+        exit 1
+    fi
+    if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2ray.zip.dgst" -s "$v2ray_url".dgst; then
+        echo "${RED}Error: Failed to download v2ray dgst!${RESET}"
+        exit 1
+    fi
+    local_v2ray_hash="$(SHA256SUM /tmp/v2ray.zip)"
+    remote_v2ray_hash=$(awk -F '= ' '/256=/ {print $2}' < /tmp/v2ray.zip.dgst)
+    if [ "$local_v2ray_hash" != "$remote_v2ray_hash" ]; then
+        echo "${RED}Error: v2ray hash value verification failed!${RESET}"
+        Expect: "$remote_v2ray_hash"
+        Actually: "$local_v2ray_hash"
         exit 1
     fi
 }
@@ -175,7 +216,19 @@ download_xray() {
     echo "${GREEN}Downloading xray version $xray_remote_version${RESET}"
     echo "${GREEN}Downloading from $xray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/xray.zip" -# "$xray_url"; then
-        echo "${RED}Error: Failed to download xray!${RESET}" >&2
+        echo "${RED}Error: Failed to download xray!${RESET}"
+        exit 1
+    fi
+    if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/xray.zip.dgst" -s "$xray_url".dgst; then
+        echo "${RED}Error: Failed to download xray dgst!${RESET}"
+        exit 1
+    fi
+    local_xray_hash="$(SHA256SUM /tmp/xray.zip)"
+    remote_xray_hash=$(awk -F '= ' '/256=/ {print $2}' < /tmp/xray.zip.dgst)
+    if [ "$local_xray_hash" != "$remote_xray_hash" ]; then
+        echo "${RED}Error: xray hash value verification failed!${RESET}"
+        Expect: "$remote_xray_hash"
+        Actually: "$local_xray_hash"
         exit 1
     fi
 }
@@ -183,7 +236,19 @@ download_v2raya() {
     echo "${GREEN}Downloading v2rayA version $v2raya_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2raya_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya" -# "$v2raya_url"; then
-        echo "${RED}Error: Failed to download v2rayA!${RESET}" >&2
+        echo "${RED}Error: Failed to download v2rayA!${RESET}"
+        exit 1
+    fi
+    if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.sha256.txt" -s "$v2raya_url".sha256.txt; then
+        echo "${RED}Error: Failed to download v2rayA sha256 txt!${RESET}"
+        exit 1
+    fi
+    local_v2raya_hash="$(SHA256SUM /tmp/v2raya)"
+    remote_v2raya_hash=$(cat /tmp/v2raya.sha256.txt)
+    if [ "$local_v2raya_hash" != "$remote_v2raya_hash" ]; then
+        echo "${RED}Error: v2rayA hash value verification failed!${RESET}"
+        Expect: "$remote_v2raya_hash"
+        Actually: "$local_v2raya_hash"
         exit 1
     fi
     if command -v systemctl > /dev/null 2>&1; then
@@ -191,7 +256,7 @@ download_v2raya() {
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_file_url${RESET}"
         if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya.service" -# "$service_file_url"; then
-            echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
+            echo "${RED}Error: Failed to download v2rayA service file!${RESET}"
             exit 1
         fi
     fi
@@ -200,7 +265,7 @@ download_v2raya() {
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_script_url${RESET}"
         if ! curl -L -H "Cache-Control: no-cache" -o "/tmp/v2raya-openrc" -s "$service_script_url"; then
-            echo "${RED}Error: Failed to download v2rayA service file!${RESET}" >&2
+            echo "${RED}Error: Failed to download v2rayA service file!${RESET}" 
             exit 1
         fi
     fi
@@ -288,6 +353,7 @@ if [ "$1" = '' ] || [ "$1" = '--with-v2ray' ]; then
         fi
         start_v2raya
     fi
+    notice_installled_tool
 fi
 if [ "$1" = '--with-xray' ]; then
     check_xray_local_version
@@ -314,6 +380,7 @@ if [ "$1" = '--with-xray' ]; then
         fi
         start_v2raya
     fi
+    notice_installled_tool
 fi
 if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
     echo "${RED}Error: Invalid argument!${RESET}" >&2
