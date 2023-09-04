@@ -23,7 +23,7 @@ if ! command -v curl > /dev/null 2>&1; then
     tool_need_install="$tool_need_install""curl"
 fi
 if ! command -v unzip > /dev/null 2>&1; then
-    tool_need_install="$tool_need_install ""unzip"
+    tool_need_install="$tool_need_install"' '"unzip"
 fi
 if [ "$tool_need_install" != "" ]; then
     if command -v apt > /dev/null 2>&1; then
@@ -244,8 +244,6 @@ install_v2raya() {
         systemctl daemon-reload
     elif command -v rc-service > /dev/null 2>&1; then
         install /tmp/v2raya-openrc /etc/init.d/v2raya
-    else
-        echo "${YELLOW}No service would be installed beacuse systemd/openrc not found on your system${RESET}"
     fi
     rm -f /tmp/v2raya 
     [ -f /tmp/v2raya.service ] && rm -f /tmp/v2raya.service || [ -f /tmp/v2raya-openrc ] && rm -f /tmp/v2raya-openrc
