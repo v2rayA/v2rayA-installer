@@ -334,6 +334,22 @@ start_v2raya() {
     fi
 }
 
+## Reset password script
+set_reset_password_script() {
+    echo '
+if [ "$(id -u)" != 0 ]; then
+    if command -v sudo > /dev/null 2>&1; then
+        sudo v2raya -c /usr/local/etc/v2raya --reset-password
+    fi
+    if command -v doas > /dev/null 2>&1; then
+        doas v2raya -c /usr/local/etc/v2raya --reset-password
+    fi
+else
+    v2raya -c /usr/local/etc/v2raya --reset-password
+fi' > /usr/local/bin/v2raya-reset-password
+    chmod 755 /usr/local/bin/v2raya-reset-password
+}
+
 ## Installation Flow
 if [ "$1" = '' ] || [ "$1" = '--with-v2ray' ]; then
     check_v2ray_local_version
@@ -360,6 +376,7 @@ if [ "$1" = '' ] || [ "$1" = '--with-v2ray' ]; then
         fi
         start_v2raya
     fi
+    set_reset_password_script
     notice_installled_tool
 fi
 if [ "$1" = '--with-xray' ]; then
@@ -387,6 +404,7 @@ if [ "$1" = '--with-xray' ]; then
         fi
         start_v2raya
     fi
+    set_reset_password_script
     notice_installled_tool
 fi
 if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
@@ -409,6 +427,7 @@ elif [ "$(command -v rc-service)" ]; then
     echo "${GREEN}Start v2rayA service at system boot:${RESET}"
     echo "rc-update add v2raya"
 else
+    echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
     echo "${YELLOW}systemd/openrc not found on your system, write and manage service by yourself.${RESET}"
 fi
 
@@ -418,6 +437,6 @@ echo "1. v2rayA has been installed to your system, the configuration directory i
 2. v2rayA will not start automatically, you can start it by yourself.
 3. If you want to uninstall v2rayA, please run uninstaller.sh.
 4. If you want to update v2rayA, please run installer.sh again.
-5. Official website: https://v2raya.org
-6. Reset password command: v2raya-reset-password"
+5. Official website: https://v2raya.org.
+6. Reset password command: v2raya-reset-password, run it if you forget your password."
 echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
