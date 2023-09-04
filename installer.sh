@@ -336,7 +336,7 @@ start_v2raya() {
 
 ## Reset password script
 set_reset_password_script() {
-    echo '
+    echo '#!/bin/sh
 if [ "$(id -u)" != 0 ]; then
     if command -v sudo > /dev/null 2>&1; then
         sudo v2raya -c /usr/local/etc/v2raya --reset-password
