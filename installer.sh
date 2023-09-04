@@ -27,7 +27,7 @@ if ! command -v unzip > /dev/null 2>&1; then
 fi
 if [ "$tool_need_install" != "" ]; then
     if command -v apt > /dev/null 2>&1; then
-        apt update && apt install -y "$tool_need_install"
+        apt update; apt install -y "$tool_need_install"
     elif command -v yum > /dev/null 2>&1; then
         yum install -y "$tool_need_install"
     elif command -v dnf > /dev/null 2>&1; then
