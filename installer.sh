@@ -197,7 +197,7 @@ compare_v2raya_version() {
 
 ## Downloading
 download_v2ray() {
-    v2ray_temp_file="$(mktemp -u /tmp/v2ray_.XXXXXX.zip)"
+    v2ray_temp_file="$(mktemp -u)"
     echo "${GREEN}Downloading v2ray version $v2ray_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2ray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file" -# "$v2ray_url"; then
@@ -218,7 +218,7 @@ download_v2ray() {
     fi
 }
 download_xray() {
-    xray_temp_file="$(mktemp -u /tmp/xray_.XXXXXX.zip)"
+    xray_temp_file="$(mktemp -u)"
     echo "${GREEN}Downloading xray version $xray_remote_version${RESET}"
     echo "${GREEN}Downloading from $xray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$xray_temp_file" -# "$xray_url"; then
@@ -239,7 +239,7 @@ download_xray() {
     fi
 }
 download_v2raya() {
-    v2raya_temp_file="$(mktemp -u /tmp/v2raya.XXXXXX.bin)"
+    v2raya_temp_file="$(mktemp -u)"
     echo "${GREEN}Downloading v2rayA version $v2raya_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2raya_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file" -# "$v2raya_url"; then
