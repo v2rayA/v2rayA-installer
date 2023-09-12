@@ -312,7 +312,7 @@ install_xray() {
 install_v2raya() {
     install "$v2raya_temp_file" /usr/local/bin/v2raya
     if command -v systemctl > /dev/null 2>&1; then
-        mv "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
+        mv -f "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
         systemctl daemon-reload
     elif command -v rc-service > /dev/null 2>&1; then
         install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
