@@ -171,7 +171,7 @@ compare_v2ray_version() {
         download_v2ray="yes"
     elif [ "$v2ray_local_version" = "$v2ray_remote_version" ]; then
         echo "${GREEN}v2ray is up to date, version $v2ray_remote_version${RESET}"
-    elif [ "$(printf '%s\n' "$v2ray_local_version" "$v2ray_remote_version" | sort -V | head -n1)" = "$v2ray_local_version" ]; then
+    elif [ "$(printf '%s\n' "$v2ray_local_version" "$v2ray_remote_version" | sort -rV | head -n1)" = "$v2ray_local_version" ]; then
         echo "${YELLOW}v2ray is not up to date, upgrading v2ray version $v2ray_local_version to version $v2ray_remote_version${RESET}"
         download_v2ray="yes"
     else
@@ -184,7 +184,7 @@ compare_xray_version() {
         download_xray="yes"
     elif [ "$xray_local_version" = "$xray_remote_version" ]; then
         echo "${GREEN}xray is up to date, version $xray_remote_version${RESET}"
-    elif [ "$(printf '%s\n' "$xray_local_version" "$xray_remote_version" | sort -V | head -n1)" = "$xray_local_version" ]; then
+    elif [ "$(printf '%s\n' "$xray_local_version" "$xray_remote_version" | sort -rV | head -n1)" = "$xray_local_version" ]; then
         echo "${YELLOW}xray is not up to date, upgrading xray version $xray_local_version to version $xray_remote_version${RESET}"
         download_xray="yes"
     else
@@ -197,7 +197,7 @@ compare_v2raya_version() {
         download_v2raya="yes"
     elif [ "$v2raya_local_version" = "$v2raya_remote_version" ]; then
         echo "${GREEN}v2rayA is up to date, version $v2raya_remote_version${RESET}"
-    elif [ "$(printf '%s\n' "$v2raya_local_version" "$v2raya_remote_version" | sort -V | head -n1)" = "$v2raya_local_version" ]; then
+    elif [ "$(printf '%s\n' "$v2raya_local_version" "$v2raya_remote_version" | sort -rV | head -n1)" = "$v2raya_local_version" ]; then
         echo "${YELLOW}v2rayA is not up to date, upgrading v2rayA version $v2raya_local_version to version $v2raya_remote_version${RESET}"
         download_v2raya="yes"
     else
