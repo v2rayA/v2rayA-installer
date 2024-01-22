@@ -2,14 +2,14 @@
 
 # shellcheck disable=SC2039
 
-# set -x
+set -e
 
 # Don't use anything from fucking Ubuntu Snap
 PATH="$(echo "$PATH" | sed 's|:/snap/bin||g')"
 export PATH
 
 ## Color
-if command -v tput > /dev/null 2>&1; then
+if command -v tput >/dev/null 2>&1; then
     RED=$(tput setaf 1)
     GREEN=$(tput setaf 2)
     YELLOW=$(tput setaf 3)
@@ -17,20 +17,20 @@ if command -v tput > /dev/null 2>&1; then
 fi
 
 ## SHA256SUM
-if command -v sha256sum > /dev/null 2>&1; then
-    SHA256SUM(){
+if command -v sha256sum >/dev/null 2>&1; then
+    SHA256SUM() {
         sha256sum "$1" | awk -F ' ' '{print$1}'
     }
-elif command -v shasum > /dev/null 2>&1; then
-    SHA256SUM(){
+elif command -v shasum >/dev/null 2>&1; then
+    SHA256SUM() {
         shasum -a 256 "$1" | awk -F ' ' '{print$1}'
     }
-elif command -v openssl > /dev/null 2>&1; then
-    SHA256SUM(){
+elif command -v openssl >/dev/null 2>&1; then
+    SHA256SUM() {
         openssl dgst -sha256 "$1" | awk -F ' ' '{print$2}'
     }
-elif command -v busybox > /dev/null 2>&1; then
-    SHA256SUM(){
+elif command -v busybox >/dev/null 2>&1; then
+    SHA256SUM() {
         busybox sha256sum "$1" | awk -F ' ' '{print$1}'
     }
 fi
@@ -43,31 +43,31 @@ fi
 
 ## Check curl, unzip
 for tool in curl unzip; do
-    if ! command -v $tool> /dev/null 2>&1; then
+    if ! command -v $tool >/dev/null 2>&1; then
         tool_need="$tool"" ""$tool_need"
     fi
 done
-if ! command -v sha256sum > /dev/null 2>&1 && ! command -v shasum > /dev/null 2>&1 && ! command -v openssl > /dev/null 2>&1; then
+if ! command -v sha256sum >/dev/null 2>&1 && ! command -v shasum >/dev/null 2>&1 && ! command -v openssl >/dev/null 2>&1; then
     tool_need="openssl"" ""$tool_need"
 fi
 if [ -n "$tool_need" ]; then
-    if command -v apt > /dev/null 2>&1; then
+    if command -v apt >/dev/null 2>&1; then
         command_install_tool="apt update; apt install $tool_need -y"
-    elif command -v dnf > /dev/null 2>&1; then
+    elif command -v dnf >/dev/null 2>&1; then
         command_install_tool="dnf install $tool_need -y"
-    elif command -v yum > /dev/null  2>&1; then
+    elif command -v yum >/dev/null 2>&1; then
         command_install_tool="yum install $tool_need -y"
-    elif command -v zypper > /dev/null 2>&1; then
+    elif command -v zypper >/dev/null 2>&1; then
         command_install_tool="zypper --non-interactive install $tool_need"
-    elif command -v pacman > /dev/null 2>&1; then
+    elif command -v pacman >/dev/null 2>&1; then
         command_install_tool="pacman -Sy $tool_need --noconfirm"
-    elif command -v apk > /dev/null 2>&1; then
+    elif command -v apk >/dev/null 2>&1; then
         command_install_tool="apk add $tool_need"
     else
         echo "$RED""You should install ""$tool_need""then try again.""$RESET"
         exit 1
     fi
-    if ! /bin/sh -c "$command_install_tool";then
+    if ! /bin/sh -c "$command_install_tool"; then
         echo "$RED""Use system package manager to install $tool_need failed,""$RESET"
         echo "$RED""You should install ""$tool_need""then try again.""$RESET"
         exit 1
@@ -87,27 +87,27 @@ if [ "$(uname -s)" != "Linux" ]; then
     exit 1
 fi
 case "$(uname -m)" in
-    x86_64)
-        v2ray_arch="64"
-        v2raya_arch="x64"
-        ;;
-    armv7l)
-        v2ray_arch="arm32-v7a"
-        v2raya_arch="armv7"
-        ;;
-    aarch64)
-        v2ray_arch="arm64-v8a"
-        v2raya_arch="arm64"
-        ;;
-    riscv64)
-        v2ray_arch="riscv64"
-        v2raya_arch="riscv64"
-        ;;
-    *)
-        echo "${RED}Error: This script only support x86_64/armv7l/aarch64/riscv64 at the monment!${RESET}" >&2
-        echo "${RED}Error: Please install v2ray and v2rayA manually!${RESET}" >&2
-        exit 1
-        ;;
+x86_64)
+    v2ray_arch="64"
+    v2raya_arch="x64"
+    ;;
+armv7l)
+    v2ray_arch="arm32-v7a"
+    v2raya_arch="armv7"
+    ;;
+aarch64)
+    v2ray_arch="arm64-v8a"
+    v2raya_arch="arm64"
+    ;;
+riscv64)
+    v2ray_arch="riscv64"
+    v2raya_arch="riscv64"
+    ;;
+*)
+    echo "${RED}Error: This script only support x86_64/armv7l/aarch64/riscv64 at the monment!${RESET}" >&2
+    echo "${RED}Error: Please install v2ray and v2rayA manually!${RESET}" >&2
+    exit 1
+    ;;
 esac
 
 ## Check version
@@ -120,7 +120,7 @@ check_v2ray_local_version() {
 }
 check_v2ray_remote_version() {
     v2ray_temp_file="$(mktemp /tmp/v2ray.XXXXXX)"
-    if ! curl -s -I "https://github.com/v2fly/v2ray-core/releases/latest" > "$v2ray_temp_file"; then
+    if ! curl -s -I "https://github.com/v2fly/v2ray-core/releases/latest" >"$v2ray_temp_file"; then
         echo "${RED}Error: Cannot get latest version of v2ray!${RESET}" >&2
         exit 1
     fi
@@ -137,7 +137,7 @@ check_xray_local_version() {
 }
 check_xray_remote_version() {
     xray_temp_file="$(mktemp /tmp/xray.XXXXXX)"
-    if ! curl -s -I "https://github.com/XTLS/Xray-core/releases/latest" > "$xray_temp_file"; then
+    if ! curl -s -I "https://github.com/XTLS/Xray-core/releases/latest" >"$xray_temp_file"; then
         echo "${RED}Error: Cannot get latest version of xray!${RESET}" >&2
         exit 1
     fi
@@ -145,16 +145,16 @@ check_xray_remote_version() {
     xray_url="https://github.com/XTLS/Xray-core/releases/download/$xray_remote_version/Xray-linux-$v2ray_arch.zip"
     rm -f "$xray_temp_file"
 }
-check_v2raya_local_version(){
+check_v2raya_local_version() {
     if [ -f "/usr/local/bin/v2raya" ]; then
         v2raya_local_version=v$(/usr/local/bin/v2raya --version | head -n 1 | cut -d " " -f2)
     else
         v2raya_local_version="0"
     fi
 }
-check_v2raya_remote_version(){
+check_v2raya_remote_version() {
     v2raya_temp_file="$(mktemp "$v2ray_temp_file".XXXXXX)"
-    if ! curl -s -I "https://github.com/v2rayA/v2rayA/releases/latest" > "$v2raya_temp_file"; then
+    if ! curl -s -I "https://github.com/v2rayA/v2rayA/releases/latest" >"$v2raya_temp_file"; then
         echo "${RED}Error: Cannot get latest version of v2rayA!${RESET}" >&2
         exit 1
     fi
@@ -167,13 +167,15 @@ check_v2raya_remote_version(){
 ## Compare version
 compare_v2ray_version() {
     if [ "$v2ray_local_version" = "0" ]; then
-        echo "${YELLOW}Warning: v2ray not installed, installing v2ray version $v2ray_remote_version${RESET}" 
+        echo "${YELLOW}Warning: v2ray not installed, installing v2ray version $v2ray_remote_version${RESET}"
         download_v2ray="yes"
     elif [ "$v2ray_local_version" = "$v2ray_remote_version" ]; then
-        echo "${GREEN}v2ray is up to date, version $v2ray_remote_version${RESET}" 
-    else
+        echo "${GREEN}v2ray is up to date, version $v2ray_remote_version${RESET}"
+    elif [ "$(printf '%s\n' "$v2ray_local_version" "$v2ray_remote_version" | sort -V | head -n1)" = "$v2ray_local_version" ]; then
         echo "${YELLOW}v2ray is not up to date, upgrading v2ray version $v2ray_local_version to version $v2ray_remote_version${RESET}"
         download_v2ray="yes"
+    else
+        echo "${YELLOW}Local v2ray version $v2ray_local_version is greater than remote version $v2ray_remote_version${RESET}"
     fi
 }
 compare_xray_version() {
@@ -181,21 +183,25 @@ compare_xray_version() {
         echo "${YELLOW}Warning: xray not installed, installing xray version $xray_remote_version${RESET}"
         download_xray="yes"
     elif [ "$xray_local_version" = "$xray_remote_version" ]; then
-        echo "${GREEN}xray is up to date, version $xray_remote_version${RESET}" 
-    else
+        echo "${GREEN}xray is up to date, version $xray_remote_version${RESET}"
+    elif [ "$(printf '%s\n' "$xray_local_version" "$xray_remote_version" | sort -V | head -n1)" = "$xray_local_version" ]; then
         echo "${YELLOW}xray is not up to date, upgrading xray version $xray_local_version to version $xray_remote_version${RESET}"
         download_xray="yes"
+    else
+        echo "${YELLOW}Local xray version $xray_local_version is greater than remote version $xray_remote_version${RESET}"
     fi
 }
 compare_v2raya_version() {
     if [ "$v2raya_local_version" = "0" ]; then
-        echo "${YELLOW}Warning: v2rayA not installed, installing v2rayA version $v2raya_remote_version${RESET}" 
+        echo "${YELLOW}Warning: v2rayA not installed, installing v2rayA version $v2raya_remote_version${RESET}"
         download_v2raya="yes"
     elif [ "$v2raya_local_version" = "$v2raya_remote_version" ]; then
-        echo "${GREEN}v2rayA is up to date, version $v2raya_remote_version${RESET}" 
-    else
-        echo "${YELLOW}v2rayA is not up to date, upgrading v2rayA version $v2raya_local_version to version $v2raya_remote_version${RESET}" 
+        echo "${GREEN}v2rayA is up to date, version $v2raya_remote_version${RESET}"
+    elif [ "$(printf '%s\n' "$v2raya_local_version" "$v2raya_remote_version" | sort -V | head -n1)" = "$v2raya_local_version" ]; then
+        echo "${YELLOW}v2rayA is not up to date, upgrading v2rayA version $v2raya_local_version to version $v2raya_remote_version${RESET}"
         download_v2raya="yes"
+    else
+        echo "${YELLOW}Local v2rayA version $v2raya_local_version is greater than remote version $v2raya_remote_version${RESET}"
     fi
 }
 
@@ -205,7 +211,7 @@ download_v2ray() {
     echo "${GREEN}Downloading v2ray version $v2ray_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2ray_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file" -# "$v2ray_url"; then
-        echo "${RED}Error: Failed to download v2ray!${RESET}" 
+        echo "${RED}Error: Failed to download v2ray!${RESET}"
         exit 1
     fi
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file.dgst" -s "$v2ray_url".dgst; then
@@ -213,7 +219,7 @@ download_v2ray() {
         exit 1
     fi
     local_v2ray_hash="$(SHA256SUM "$v2ray_temp_file")"
-    remote_v2ray_hash=$(awk -F '= ' '/256=/ {print $2}' < "$v2ray_temp_file".dgst)
+    remote_v2ray_hash=$(awk -F '= ' '/256=/ {print $2}' <"$v2ray_temp_file".dgst)
     if [ "$local_v2ray_hash" != "$remote_v2ray_hash" ]; then
         echo "${RED}Error: v2ray hash value verification failed!${RESET}"
         echo "Expect: $remote_v2ray_hash"
@@ -234,7 +240,7 @@ download_xray() {
         exit 1
     fi
     local_xray_hash="$(SHA256SUM "$xray_temp_file")"
-    remote_xray_hash=$(awk -F '= ' '/256=/ {print $2}' < "$xray_temp_file".dgst)
+    remote_xray_hash=$(awk -F '= ' '/256=/ {print $2}' <"$xray_temp_file".dgst)
     if [ "$local_xray_hash" != "$remote_xray_hash" ]; then
         echo "${RED}Error: xray hash value verification failed!${RESET}"
         echo "Expect: $remote_xray_hash"
@@ -262,7 +268,7 @@ download_v2raya() {
         echo "Actually: $local_v2raya_hash"
         exit 1
     fi
-    if command -v systemctl > /dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1; then
         service_file_url="https://github.com/v2rayA/v2rayA-installer/raw/main/systemd/v2raya.service"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_file_url${RESET}"
@@ -271,12 +277,12 @@ download_v2raya() {
             exit 1
         fi
     fi
-    if command -v rc-service > /dev/null 2>&1; then
+    if command -v rc-service >/dev/null 2>&1; then
         service_script_url="https://github.com/v2rayA/v2rayA-installer/raw/main/openrc/v2raya"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
         echo "${GREEN}Downloading from $service_script_url${RESET}"
         if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file"-openrc -s "$service_script_url"; then
-            echo "${RED}Error: Failed to download v2rayA service file!${RESET}" 
+            echo "${RED}Error: Failed to download v2rayA service file!${RESET}"
             exit 1
         fi
     fi
@@ -315,13 +321,13 @@ install_xray() {
 }
 install_v2raya() {
     install "$v2raya_temp_file" /usr/local/bin/v2raya
-    if command -v systemctl > /dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1; then
         mv -f "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
         systemctl daemon-reload
-    elif command -v rc-service > /dev/null 2>&1; then
+    elif command -v rc-service >/dev/null 2>&1; then
         install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
     fi
-    rm -f "$v2raya_temp_file" "$v2raya_temp_file".sha256.txt 
+    rm -f "$v2raya_temp_file" "$v2raya_temp_file".sha256.txt
     [ -f "$v2raya_temp_file".service ] && rm -f "$v2raya_temp_file".service || [ -f "$v2raya_temp_file"-openrc ] && rm -f "$v2raya_temp_file"-openrc
     echo "${GREEN}v2rayA version $v2raya_remote_version installed successfully!${RESET}"
 }
@@ -348,9 +354,11 @@ if [ "$(id -u)" != 0 ]; then
     if command -v doas > /dev/null 2>&1; then
         doas v2raya -c /usr/local/etc/v2raya --reset-password
     fi
-else
+elif [ "$(id -u)" = 0 ]; then
     v2raya -c /usr/local/etc/v2raya --reset-password
-fi' > /usr/local/bin/v2raya-reset-password
+else
+    echo "Error: This command must be run as root!" >&2
+fi' >/usr/local/bin/v2raya-reset-password
     chmod 755 /usr/local/bin/v2raya-reset-password
 }
 
@@ -437,7 +445,7 @@ fi
 
 echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
 echo "1. v2rayA has been installed to your system, the configuration directory is
-   /usr/local/etc/v2raya. 
+   /usr/local/etc/v2raya.
 2. v2rayA will not start automatically, you can start it by yourself.
 3. If you want to uninstall v2rayA, please run uninstaller.sh.
 4. If you want to update v2rayA, please run installer.sh again.
