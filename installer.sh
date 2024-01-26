@@ -124,7 +124,7 @@ check_v2ray_remote_version() {
         echo "${RED}Error: Cannot get latest version of v2ray!${RESET}"
         exit 1
     fi
-    v2ray_remote_version=$(grep tag_name "$v2ray_temp_file" | awk -F '"' '{printf $4}')
+    v2ray_remote_version=$(grep tag_name "$v2ray_temp_file" | awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
     v2ray_url="https://github.com/v2fly/v2ray-core/releases/download/$v2ray_remote_version/v2ray-linux-$v2ray_arch.zip"
     rm -f "$v2ray_temp_file"
 }
@@ -141,7 +141,7 @@ check_xray_remote_version() {
         echo "${RED}Error: Cannot get latest version of xray!${RESET}"
         exit 1
     fi
-    xray_remote_version=$(grep tag_name "$xray_temp_file" | awk -F '"' '{printf $4}')
+    xray_remote_version=$(grep tag_name "$xray_temp_file" | awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
     xray_url="https://github.com/XTLS/Xray-core/releases/download/$xray_remote_version/Xray-linux-$v2ray_arch.zip"
     rm -f "$xray_temp_file"
 }
@@ -158,7 +158,7 @@ check_v2raya_remote_version() {
         echo "${RED}Error: Cannot get latest version of v2rayA!${RESET}"
         exit 1
     fi
-    v2raya_remote_version=$(grep tag_name "$v2raya_temp_file"| awk -F '"' '{printf $4}')
+    v2raya_remote_version=$(grep tag_name "$v2raya_temp_file"| awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
     v2raya_short_version=$(echo "$v2raya_remote_version" | cut -d "v" -f2)
     v2raya_url="https://github.com/v2rayA/v2rayA/releases/download/${v2raya_remote_version}/v2raya_linux_${v2raya_arch}_${v2raya_short_version}"
     rm -f "$v2raya_temp_file"
