@@ -120,11 +120,11 @@ check_v2ray_local_version() {
 }
 check_v2ray_remote_version() {
     v2ray_temp_file="$(mktemp /tmp/v2ray.XXXXXX)"
-    if ! curl -s -I "https://github.com/v2fly/v2ray-core/releases/latest" >"$v2ray_temp_file"; then
-        echo "${RED}Error: Cannot get latest version of v2ray!${RESET}" >&2
+    if ! curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" -o "$v2ray_temp_file"; then
+        echo "${RED}Error: Cannot get latest version of v2ray!${RESET}"
         exit 1
     fi
-    v2ray_remote_version=$(grep -i ^location: "$v2ray_temp_file" | awk '{print $2}' | tr -d '\r' | awk -F 'tag/' '{print $2}')
+    v2ray_remote_version=$(grep tag_name "$v2ray_temp_file" | awk -F '"' '{printf $4}')
     v2ray_url="https://github.com/v2fly/v2ray-core/releases/download/$v2ray_remote_version/v2ray-linux-$v2ray_arch.zip"
     rm -f "$v2ray_temp_file"
 }
@@ -137,11 +137,11 @@ check_xray_local_version() {
 }
 check_xray_remote_version() {
     xray_temp_file="$(mktemp /tmp/xray.XXXXXX)"
-    if ! curl -s -I "https://github.com/XTLS/Xray-core/releases/latest" >"$xray_temp_file"; then
-        echo "${RED}Error: Cannot get latest version of xray!${RESET}" >&2
+    if ! curl -s "https://api.github.com/repos/XTLS/Xray-core/releases/latest" -o "$xray_temp_file"; then
+        echo "${RED}Error: Cannot get latest version of xray!${RESET}"
         exit 1
     fi
-    xray_remote_version=$(grep -i ^location: "$xray_temp_file" | awk '{print $2}' | tr -d '\r' | awk -F 'tag/' '{print $2}')
+    xray_remote_version=$(grep tag_name "$xray_temp_file" | awk -F '"' '{printf $4}')
     xray_url="https://github.com/XTLS/Xray-core/releases/download/$xray_remote_version/Xray-linux-$v2ray_arch.zip"
     rm -f "$xray_temp_file"
 }
@@ -154,11 +154,11 @@ check_v2raya_local_version() {
 }
 check_v2raya_remote_version() {
     v2raya_temp_file="$(mktemp "$v2ray_temp_file".XXXXXX)"
-    if ! curl -s -I "https://github.com/v2rayA/v2rayA/releases/latest" >"$v2raya_temp_file"; then
-        echo "${RED}Error: Cannot get latest version of v2rayA!${RESET}" >&2
+    if ! curl -s "https://api.github.com/repos/v2rayA/v2rayA/releases/latest" -o "$v2raya_temp_file"; then
+        echo "${RED}Error: Cannot get latest version of v2rayA!${RESET}"
         exit 1
     fi
-    v2raya_remote_version=$(grep -i ^location: "$v2raya_temp_file" | awk '{print $2}' | tr -d '\r' | awk -F 'tag/' '{print $2}')
+    v2raya_remote_version=$(grep tag_name "$v2raya_temp_file"| awk -F '"' '{printf $4}')
     v2raya_short_version=$(echo "$v2raya_remote_version" | cut -d "v" -f2)
     v2raya_url="https://github.com/v2rayA/v2rayA/releases/download/${v2raya_remote_version}/v2raya_linux_${v2raya_arch}_${v2raya_short_version}"
     rm -f "$v2raya_temp_file"
@@ -322,7 +322,7 @@ install_xray() {
 install_v2raya() {
     install "$v2raya_temp_file" /usr/local/bin/v2raya
     if command -v systemctl >/dev/null 2>&1; then
-        mv -f "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
+        install -m 644 "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
         systemctl daemon-reload
     elif command -v rc-service >/dev/null 2>&1; then
         install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
@@ -357,7 +357,7 @@ if [ "$(id -u)" != 0 ]; then
 elif [ "$(id -u)" = 0 ]; then
     v2raya -c /usr/local/etc/v2raya --reset-password
 else
-    echo "Error: This command must be run as root!" >&2
+    echo "Error: This command must be run as root!"
 fi' >/usr/local/bin/v2raya-reset-password
     chmod 755 /usr/local/bin/v2raya-reset-password
 }
