@@ -88,63 +88,25 @@ if [ "$(uname -s)" != "Linux" ]; then
 fi
 case "$(uname -m)" in
 x86_64)
-    v2ray_arch="64"
     v2raya_arch="x64"
     ;;
 armv7l)
-    v2ray_arch="arm32-v7a"
     v2raya_arch="armv7"
     ;;
 aarch64)
-    v2ray_arch="arm64-v8a"
     v2raya_arch="arm64"
     ;;
 riscv64)
-    v2ray_arch="riscv64"
     v2raya_arch="riscv64"
     ;;
 *)
     echo "${RED}Error: This script only support x86_64/armv7l/aarch64/riscv64 at the monment!${RESET}" >&2
-    echo "${RED}Error: Please install v2ray and v2rayA manually!${RESET}" >&2
+    echo "${RED}Error: Please install v2rayA manually!${RESET}" >&2
     exit 1
     ;;
 esac
 
 ## Check version
-check_v2ray_local_version() {
-    if [ -f "/usr/local/bin/v2ray" ]; then
-        v2ray_local_version=v$(/usr/local/bin/v2ray version | head -n 1 | cut -d " " -f2)
-    else
-        v2ray_local_version="0"
-    fi
-}
-check_v2ray_remote_version() {
-    v2ray_temp_file="$(mktemp /tmp/v2ray.XXXXXX)"
-    if ! curl -s "https://api.github.com/repos/v2fly/v2ray-core/releases/latest" -o "$v2ray_temp_file"; then
-        echo "${RED}Error: Cannot get latest version of v2ray!${RESET}"
-        exit 1
-    fi
-    v2ray_remote_version=$(grep tag_name "$v2ray_temp_file" | awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
-    v2ray_url="https://github.com/v2fly/v2ray-core/releases/download/$v2ray_remote_version/v2ray-linux-$v2ray_arch.zip"
-    rm -f "$v2ray_temp_file"
-}
-check_xray_local_version() {
-    if [ -f "/usr/local/bin/xray" ]; then
-        xray_local_version=v$(/usr/local/bin/xray version | head -n 1 | cut -d " " -f2)
-    else
-        xray_local_version="0"
-    fi
-}
-check_xray_remote_version() {
-    xray_temp_file="$(mktemp /tmp/xray.XXXXXX)"
-    if ! curl -s "https://api.github.com/repos/XTLS/Xray-core/releases/latest" -o "$xray_temp_file"; then
-        echo "${RED}Error: Cannot get latest version of xray!${RESET}"
-        exit 1
-    fi
-    xray_remote_version=$(grep tag_name "$xray_temp_file" | awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
-    xray_url="https://github.com/XTLS/Xray-core/releases/download/$xray_remote_version/Xray-linux-$v2ray_arch.zip"
-    rm -f "$xray_temp_file"
-}
 check_v2raya_local_version() {
     if [ -f "/usr/local/bin/v2raya" ]; then
         v2raya_local_version=v$(/usr/local/bin/v2raya --version | head -n 1 | cut -d " " -f2)
@@ -153,7 +115,7 @@ check_v2raya_local_version() {
     fi
 }
 check_v2raya_remote_version() {
-    v2raya_temp_file="$(mktemp "$v2ray_temp_file".XXXXXX)"
+    v2raya_temp_file="$(mktemp /tmp/v2raya.XXXXXX)"
     if ! curl -s "https://api.github.com/repos/v2rayA/v2rayA/releases/latest" -o "$v2raya_temp_file"; then
         echo "${RED}Error: Cannot get latest version of v2rayA!${RESET}"
         exit 1
@@ -161,36 +123,11 @@ check_v2raya_remote_version() {
     v2raya_remote_version=$(grep tag_name "$v2raya_temp_file"| awk -F "tag_name" '{printf $2}' | awk -F "," '{printf $1}' | awk -F '"' '{printf $3}')
     v2raya_short_version=$(echo "$v2raya_remote_version" | cut -d "v" -f2)
     v2raya_url="https://github.com/v2rayA/v2rayA/releases/download/${v2raya_remote_version}/v2raya_linux_${v2raya_arch}_${v2raya_short_version}"
+    v2raya_core_url="https://github.com/v2rayA/v2rayA/releases/download/${v2raya_remote_version}/v2raya_core_linux_${v2raya_arch}_${v2raya_short_version}"
     rm -f "$v2raya_temp_file"
 }
 
 ## Compare version
-compare_v2ray_version() {
-    if [ "$v2ray_local_version" = "0" ]; then
-        echo "${YELLOW}Warning: v2ray not installed, installing v2ray version $v2ray_remote_version${RESET}"
-        download_v2ray="yes"
-    elif [ "$v2ray_local_version" = "$v2ray_remote_version" ]; then
-        echo "${GREEN}v2ray is up to date, version $v2ray_remote_version${RESET}"
-    elif [ "$(printf '%s\n' "$v2ray_local_version" "$v2ray_remote_version" | sort -rV | head -n1)" = "$v2ray_remote_version" ]; then
-        echo "${YELLOW}v2ray is not up to date, upgrading v2ray version $v2ray_local_version to version $v2ray_remote_version${RESET}"
-        download_v2ray="yes"
-    else
-        echo "${YELLOW}Local v2ray version $v2ray_local_version is greater than remote version $v2ray_remote_version${RESET}"
-    fi
-}
-compare_xray_version() {
-    if [ "$xray_local_version" = "0" ]; then
-        echo "${YELLOW}Warning: xray not installed, installing xray version $xray_remote_version${RESET}"
-        download_xray="yes"
-    elif [ "$xray_local_version" = "$xray_remote_version" ]; then
-        echo "${GREEN}xray is up to date, version $xray_remote_version${RESET}"
-    elif [ "$(printf '%s\n' "$xray_local_version" "$xray_remote_version" | sort -rV | head -n1)" = "$xray_remote_version" ]; then
-        echo "${YELLOW}xray is not up to date, upgrading xray version $xray_local_version to version $xray_remote_version${RESET}"
-        download_xray="yes"
-    else
-        echo "${YELLOW}Local xray version $xray_local_version is greater than remote version $xray_remote_version${RESET}"
-    fi
-}
 compare_v2raya_version() {
     if [ "$v2raya_local_version" = "0" ]; then
         echo "${YELLOW}Warning: v2rayA not installed, installing v2rayA version $v2raya_remote_version${RESET}"
@@ -206,50 +143,12 @@ compare_v2raya_version() {
 }
 
 ## Downloading
-download_v2ray() {
-    v2ray_temp_file="$(mktemp -u)"
-    echo "${GREEN}Downloading v2ray version $v2ray_remote_version${RESET}"
-    echo "${GREEN}Downloading from $v2ray_url${RESET}"
-    if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file" -# "$v2ray_url"; then
-        echo "${RED}Error: Failed to download v2ray!${RESET}"
-        exit 1
-    fi
-    if ! curl -L -H "Cache-Control: no-cache" -o "$v2ray_temp_file.dgst" -s "$v2ray_url".dgst; then
-        echo "${RED}Error: Failed to download v2ray dgst!${RESET}"
-        exit 1
-    fi
-    local_v2ray_hash="$(SHA256SUM "$v2ray_temp_file")"
-    remote_v2ray_hash=$(awk -F '= ' '/256=/ {print $2}' <"$v2ray_temp_file".dgst)
-    if [ "$local_v2ray_hash" != "$remote_v2ray_hash" ]; then
-        echo "${RED}Error: v2ray hash value verification failed!${RESET}"
-        echo "Expect: $remote_v2ray_hash"
-        echo "Actually: $local_v2ray_hash"
-        exit 1
-    fi
-}
-download_xray() {
-    xray_temp_file="$(mktemp -u)"
-    echo "${GREEN}Downloading xray version $xray_remote_version${RESET}"
-    echo "${GREEN}Downloading from $xray_url${RESET}"
-    if ! curl -L -H "Cache-Control: no-cache" -o "$xray_temp_file" -# "$xray_url"; then
-        echo "${RED}Error: Failed to download xray!${RESET}"
-        exit 1
-    fi
-    if ! curl -L -H "Cache-Control: no-cache" -o "$xray_temp_file.dgst" -s "$xray_url".dgst; then
-        echo "${RED}Error: Failed to download xray dgst!${RESET}"
-        exit 1
-    fi
-    local_xray_hash="$(SHA256SUM "$xray_temp_file")"
-    remote_xray_hash=$(awk -F '= ' '/256=/ {print $2}' <"$xray_temp_file".dgst)
-    if [ "$local_xray_hash" != "$remote_xray_hash" ]; then
-        echo "${RED}Error: xray hash value verification failed!${RESET}"
-        echo "Expect: $remote_xray_hash"
-        echo "Actually: $local_xray_hash"
-        exit 1
-    fi
-}
 download_v2raya() {
     v2raya_temp_file="$(mktemp -u)"
+    v2raya_core_temp_file="$(mktemp -u)"
+    geoip_temp_file="$(mktemp -u)"
+    geosite_temp_file="$(mktemp -u)"
+
     echo "${GREEN}Downloading v2rayA version $v2raya_remote_version${RESET}"
     echo "${GREEN}Downloading from $v2raya_url${RESET}"
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file" -# "$v2raya_url"; then
@@ -257,7 +156,7 @@ download_v2raya() {
         exit 1
     fi
     if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_temp_file".sha256.txt -s "$v2raya_url".sha256.txt; then
-        echo "${RED}Error: Failed to download v2rayA sha256 txt!${RESET}"
+        echo "${RED}Error: Failed to download v2rayA sha256 file!${RESET}"
         exit 1
     fi
     local_v2raya_hash="$(SHA256SUM "$v2raya_temp_file")"
@@ -268,6 +167,40 @@ download_v2raya() {
         echo "Actually: $local_v2raya_hash"
         exit 1
     fi
+
+    echo "${GREEN}Downloading v2rayA core version $v2raya_remote_version${RESET}"
+    echo "${GREEN}Downloading from $v2raya_core_url${RESET}"
+    if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_core_temp_file" -# "$v2raya_core_url"; then
+        echo "${RED}Error: Failed to download v2rayA core!${RESET}"
+        exit 1
+    fi
+    if ! curl -L -H "Cache-Control: no-cache" -o "$v2raya_core_temp_file".sha256.txt -s "$v2raya_core_url".sha256.txt; then
+        echo "${RED}Error: Failed to download v2rayA core sha256 file!${RESET}"
+        exit 1
+    fi
+    local_v2raya_core_hash="$(SHA256SUM "$v2raya_core_temp_file")"
+    remote_v2raya_core_hash=$(cat "$v2raya_core_temp_file".sha256.txt)
+    if [ "$local_v2raya_core_hash" != "$remote_v2raya_core_hash" ]; then
+        echo "${RED}Error: v2rayA core hash value verification failed!${RESET}"
+        echo "Expect: $remote_v2raya_core_hash"
+        echo "Actually: $local_v2raya_core_hash"
+        exit 1
+    fi
+
+    echo "${GREEN}Downloading geoip.dat${RESET}"
+    echo "${GREEN}Downloading from https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat${RESET}"
+    if ! curl -L -H "Cache-Control: no-cache" -o "$geoip_temp_file" -# "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"; then
+        echo "${RED}Error: Failed to download geoip.dat!${RESET}"
+        exit 1
+    fi
+
+    echo "${GREEN}Downloading geosite.dat${RESET}"
+    echo "${GREEN}Downloading from https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat${RESET}"
+    if ! curl -L -H "Cache-Control: no-cache" -o "$geosite_temp_file" -# "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"; then
+        echo "${RED}Error: Failed to download geosite.dat!${RESET}"
+        exit 1
+    fi
+
     if command -v systemctl >/dev/null 2>&1; then
         service_file_url="https://github.com/v2rayA/v2rayA-installer/raw/main/systemd/v2raya.service"
         echo "${GREEN}Downloading v2rayA service file${RESET}"
@@ -301,33 +234,21 @@ stop_v2raya() {
 }
 
 ## Installing
-install_v2ray() {
-    unzip -q "$v2ray_temp_file" -d "$v2ray_temp_file"_unzipped
-    install "$v2ray_temp_file"_unzipped/v2ray /usr/local/bin/v2ray
-    [ -d /usr/local/share/v2ray ] || mkdir -p /usr/local/share/v2ray
-    mv "$v2ray_temp_file"_unzipped/geoip.dat /usr/local/share/v2ray/geoip.dat
-    mv "$v2ray_temp_file"_unzipped/geosite.dat /usr/local/share/v2ray/geosite.dat
-    rm -rf "$v2ray_temp_file" "$v2ray_temp_file"_unzipped "$v2ray_temp_file".dgst
-    echo "${GREEN}v2ray version $v2ray_remote_version installed successfully!${RESET}"
-}
-install_xray() {
-    unzip -q "$xray_temp_file" -d "$xray_temp_file"_unzipped
-    install "$xray_temp_file"_unzipped/xray /usr/local/bin/xray
-    [ -d /usr/local/share/xray ] || mkdir -p /usr/local/share/xray
-    mv "$xray_temp_file"_unzipped/geoip.dat /usr/local/share/xray/geoip.dat
-    mv "$xray_temp_file"_unzipped/geosite.dat /usr/local/share/xray/geosite.dat
-    rm -rf "$xray_temp_file" "$xray_temp_file"_unzipped "$xray_temp_file".dgst
-    echo "${GREEN}xray version $xray_remote_version installed successfully!${RESET}"
-}
 install_v2raya() {
     install "$v2raya_temp_file" /usr/local/bin/v2raya
+    install "$v2raya_core_temp_file" /usr/local/bin/v2raya_core
+    mkdir -p /usr/local/share/v2raya
+    install "$geoip_temp_file" /usr/local/share/v2raya/geoip.dat
+    install "$geosite_temp_file" /usr/local/share/v2raya/geosite.dat
     if command -v systemctl >/dev/null 2>&1; then
         install -m 644 "$v2raya_temp_file".service /etc/systemd/system/v2raya.service
         systemctl daemon-reload
     elif command -v rc-service >/dev/null 2>&1; then
         install "$v2raya_temp_file"-openrc /etc/init.d/v2raya
     fi
-    rm -f "$v2raya_temp_file" "$v2raya_temp_file".sha256.txt
+    rm -f "$v2raya_temp_file" "$v2raya_temp_file".sha256.txt \
+          "$v2raya_core_temp_file" "$v2raya_core_temp_file".sha256.txt \
+          "$geoip_temp_file" "$geosite_temp_file"
     [ -f "$v2raya_temp_file".service ] && rm -f "$v2raya_temp_file".service || [ -f "$v2raya_temp_file"-openrc ] && rm -f "$v2raya_temp_file"-openrc
     echo "${GREEN}v2rayA version $v2raya_remote_version installed successfully!${RESET}"
 }
@@ -363,67 +284,21 @@ fi' >/usr/local/bin/v2raya-reset-password
 }
 
 ## Installation Flow
-if [ "$1" = '' ] || [ "$1" = '--with-v2ray' ]; then
-    check_v2ray_local_version
-    check_v2ray_remote_version
-    check_v2raya_local_version
-    check_v2raya_remote_version
-    compare_v2ray_version
-    if [ "$download_v2ray" = "yes" ]; then
-        download_v2ray
-        install_v2ray_need="yes"
-    fi
-    compare_v2raya_version
-    if [ "$download_v2raya" = "yes" ]; then
-        download_v2raya
-        install_v2raya_need="yes"
-    fi
-    if [ "$install_v2ray_need" = "yes" ] || [ "$install_v2raya_need" = yes ]; then
-        stop_v2raya
-        if [ "$install_v2ray_need" = "yes" ]; then
-            install_v2ray
-        fi
-        if [ "$install_v2raya_need" = "yes" ]; then
-            install_v2raya
-        fi
-        start_v2raya
-    fi
-    set_reset_password_script
-    notice_installled_tool
+check_v2raya_local_version
+check_v2raya_remote_version
+compare_v2raya_version
+if [ "$download_v2raya" = "yes" ]; then
+    download_v2raya
+    install_v2raya_need="yes"
 fi
-if [ "$1" = '--with-xray' ]; then
-    check_xray_local_version
-    check_xray_remote_version
-    check_v2raya_local_version
-    check_v2raya_remote_version
-    compare_xray_version
-    if [ "$download_xray" = "yes" ]; then
-        download_xray
-        install_xray_need="yes"
-    fi
-    compare_v2raya_version
-    if [ "$download_v2raya" = "yes" ]; then
-        download_v2raya
-        install_v2raya_need="yes"
-    fi
-    if [ "$install_xray_need" = "yes" ] || [ "$install_v2raya_need" = yes ]; then
-        stop_v2raya
-        if [ "$install_xray_need" = "yes" ]; then
-            install_xray
-        fi
-        if [ "$install_v2raya_need" = "yes" ]; then
-            install_v2raya
-        fi
-        start_v2raya
-    fi
-    set_reset_password_script
-    notice_installled_tool
+if [ "$install_v2raya_need" = "yes" ]; then
+    stop_v2raya
+    install_v2raya
+    start_v2raya
 fi
-if [ "$1" != '' ] && [ "$1" != '--with-v2ray' ] && [ "$1" != '--with-xray' ]; then
-    echo "${RED}Error: Invalid argument!${RESET}" >&2
-    echo "${GREEN}Usage: installer.sh [--with-v2ray|--with-xray]${RESET}" >&2
-    exit 1
-fi
+set_reset_password_script
+notice_installled_tool
+
 if [ "$(command -v systemctl)" ]; then
     echo "${GREEN}"--------------------------------------------------------------------------------"${RESET}"
     echo "${GREEN}"Commands:"${RESET}"

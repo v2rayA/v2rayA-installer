@@ -18,6 +18,9 @@ if [ -f /etc/init.d/v2raya ] && [ -f /sbin/openrc-run ];then
 fi
 
 rm -f /usr/local/bin/v2raya
+rm -f /usr/local/bin/v2raya_core
+rm -f /usr/local/share/v2raya/geoip.dat
+rm -f /usr/local/share/v2raya/geosite.dat
 
 if [ -f /usr/local/bin/v2ray ];then
     echo "v2ray has been detected, do you want to remove it? [y/N]"
